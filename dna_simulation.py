@@ -1,7 +1,9 @@
 """
-Computational Biology: DNA -> mRNA -> Protein Simulation
+Computational Biology: DNA -> mRNA -> Protein Simulation with Visualization
 Author: Murathan Kizilirmak
 """
+
+import matplotlib.pyplot as plt
 
 # Genetic Code Dictionary (RNA Codon Table)
 RNA_CODON_TABLE = {
@@ -13,7 +15,7 @@ RNA_CODON_TABLE = {
     'CCU': 'P', 'CCC': 'P', 'CCA': 'P', 'CCG': 'P',
     'CAU': 'H', 'CAC': 'H', 'CAA': 'Q', 'CAG': 'Q',
     'CGU': 'R', 'CGC': 'R', 'CGA': 'R', 'CGG': 'R',
-    'AUU': 'I', 'AUC': 'I', 'AUA': 'I', 'AUG': 'M',  # AUG is also the START codon.
+    'AUU': 'I', 'AUC': 'I', 'AUA': 'I', 'AUG': 'M',
     'ACU': 'T', 'ACC': 'T', 'ACA': 'T', 'ACG': 'T',
     'AAU': 'N', 'AAC': 'N', 'AAA': 'K', 'AAG': 'K',
     'AGU': 'S', 'AGC': 'S', 'AGA': 'R', 'AGG': 'R',
@@ -43,26 +45,54 @@ def translate_mrna(mrna_sequence):
     mrna = mrna_sequence.upper()
     protein = []
     
-    # Loop through the sequence in steps of 3 (Codons)
     for i in range(0, len(mrna) - 2, 3):
         codon = mrna[i:i+3]
-        amino_acid = RNA_CODON_TABLE.get(codon, '?') # '?' for unknown codons
+        amino_acid = RNA_CODON_TABLE.get(codon, '?')
         
         if amino_acid == 'STOP':
             protein.append("[STOP]")
-            break # STOP codon terminates translation
+            break
         else:
             protein.append(amino_acid)
             
     return "-".join(protein)
+
+def plot_base_frequencies(dna_sequence):
+    """Counts DNA bases and generates a bar chart visualization."""
+    dna = dna_sequence.upper()
+    
+    # Count the occurrences of each base
+    frequencies = {
+        'Adenine (A)': dna.count('A'),
+        'Thymine (T)': dna.count('T'),
+        'Guanine (G)': dna.count('G'),
+        'Cytosine (C)': dna.count('C')
+    }
+    
+    # Graph Styling
+    colors = ['#4CAF50', '#FF5722', '#2196F3', '#9C27B0'] # Custom colors for DNA bases
+    plt.figure(figsize=(8, 5))
+    
+    # Create Bar Chart
+    plt.bar(frequencies.keys(), frequencies.values(), color=colors, edgecolor='black')
+    
+    # Add Titles and Labels
+    plt.title("DNA Base Frequency Analysis", fontsize=14, fontweight='bold')
+    plt.xlabel("Nucleotide Bases", fontsize=12)
+    plt.ylabel("Count / Frequency", fontsize=12)
+    plt.grid(axis='y', linestyle='--', alpha=0.7) # Gridlines for better readability
+    
+    # Show the plot
+    plt.tight_layout()
+    plt.show()
 
 def main():
     print("=" * 50)
     print("   COMPUTATIONAL BIOLOGY: SIMULATION TOOL   ")
     print("=" * 50)
     
-    # Sample DNA sequence (Feel free to change it)
-    sample_dna = "ATGTACTCGGCAATCTACTTTGCAACCAATATTTAA"
+    # A longer sample DNA sequence to make the graph look better
+    sample_dna = "ATGGCCATTGTAATGGGCCGCTGAAAGGGTCCCAATTTTTAA"
     
     print(f"Input DNA Sequence : {sample_dna}")
     
@@ -78,6 +108,10 @@ def main():
     protein_sequence = translate_mrna(mrna)
     print(f"Synthesized Protein: {protein_sequence}")
     print("=" * 50)
+    
+    # 4. Data Visualization
+    print("Generating visualization window...")
+    plot_base_frequencies(sample_dna)
 
 if __name__ == "__main__":
     main()
