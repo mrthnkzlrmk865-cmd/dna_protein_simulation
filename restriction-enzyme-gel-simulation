@@ -1,0 +1,116 @@
+"""Computational Biology: Restriction Enzyme Digestion & Gel Electrophoresis Simulation
+Author: Murathan Kizilirmak
+"""
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+def digest_dna(dna_sequence, enzyme_name, restriction_site):
+    """
+    Simulates molecular cutting of DNA using a specific restriction enzyme.
+    Returns a list of fragment sizes (bp).
+    """
+    dna = dna_sequence.upper()
+    site = restriction_site.upper()
+    
+    print(f"\n[Action] Running digestion with {enzyme_name} (Target site: {site})...")
+    
+    # Find all start indices of the restriction site
+    cut_positions = []
+    idx = dna.find(site)
+    while idx != -1:
+        # In molecular biology, EcoRI cuts between G and A (GAATTC -> G | AATTC)
+        # So we add the exact cut point relative to the sequence
+        cut_positions.append(idx + 1)
+        idx = dna.find(site, idx + 1)
+        
+    print(f"-> Found {len(cut_positions)} restriction site(s) at positions: {cut_positions}")
+    
+    # If no cuts are found, the DNA remains intact as one single piece
+    if not cut_positions:
+        return [len(dna)]
+        
+    # Slice the string into fragments based on cut positions
+    fragments = []
+    start_pos = 0
+    for cut in cut_positions:
+        fragment = dna[start_pos:cut]
+        fragments.append(fragment)
+        start_pos = cut
+    # Don't forget to add the remaining tail fragment
+    fragments.append(dna[start_pos:])
+    
+    # Calculate sizes of each generated fragment in base pairs (bp)
+    fragment_sizes = [len(frag) for frag in fragments]
+    return fragment_sizes
+
+def plot_restriction_gel(uncut_size, digested_sizes):
+    """
+    Simulates a 2-lane agarose gel: 
+    Lane 1 contains the uncut control DNA.
+    Lane 2 contains the enzyme-digested DNA fragments.
+    """
+    fig, ax = plt.subplots(figsize=(6, 8))
+    ax.set_facecolor('#1a1a1a') # Photorealistic dark UV gel matrix
+    
+    # Lane 1: Uncut DNA Control
+    # It has only 1 large band near the top
+    uncut_distance = 100 - (np.log(uncut_size) * 12)
+    ax.hlines(y=uncut_distance, xmin=0.6, xmax=1.4, colors='#00FF66', linewidth=6, alpha=0.9, capstyle='round')
+    ax.text(1.45, uncut_distance, f"{uncut_size} bp", color='white', fontsize=9, va='center')
+    
+    # Lane 2: Digested DNA Fragments
+    # Multiple smaller bands traveling further down based on physics
+    for size in digested_sizes:
+        digested_distance = 100 - (np.log(size) * 12)
+        ax.hlines(y=digested_distance, xmin=1.6, xmax=2.4, colors='#00FF66', linewidth=6, alpha=0.8, capstyle='round')
+        ax.text(2.45, digested_distance, f"{size} bp", color='white', fontsize=9, va='center')
+        
+    # Draw sample loading wells at the negative pole
+    for lane_idx in range(2):
+        rect = plt.Rectangle((lane_idx + 0.7, 95), 0.6, 3, facecolor='#333333', edgecolor='#555555')
+        ax.add_patch(rect)
+    ax.text(1.0, 91, "Lane 1:\nUncut Control", color='#888888', fontsize=10, ha='center', fontweight='bold')
+    ax.text(2.0, 91, "Lane 2:\nDigested DNA", color='#888888', fontsize=10, ha='center', fontweight='bold')
+
+    # Scientific chart specifications
+    ax.set_title("Restriction Digest - Agarose Gel Simulation", color='white', fontsize=12, fontweight='bold', pad=25)
+    ax.set_xlim(0, 3)
+    ax.set_ylim(0, 100)
+    ax.set_ylabel("DNA Migration Vector (—) ---------> (+)", color='white', fontsize=12)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    
+    for spine in ax.spines.values():
+        spine.set_color('#444444')
+        spine.set_linewidth(2)
+
+    plt.tight_layout()
+    plt.show()
+
+def main():
+    print("=" * 60)
+    print("   COMPUTATIONAL BIOLOGY: RESTRICTION MAPPING SIMULATOR   ")
+    print("=" * 60)
+    
+    # A long simulated gene sequence containing specific restriction targets
+    # Look closely: you can see 'GAATTC' repeating inside it
+    raw_gene = "ATGCGATCGATCGATCGATGAATTCTACGATCGATCGATCGATCGATCGAATTCTACGATCGATCGATC"
+    original_size = len(raw_gene)
+    print(f"Original DNA Sequence Length: {original_size} base pairs (bp)")
+    
+    # EcoRI enzyme specifications
+    enzyme = "EcoRI"
+    target_sequence = "GAATTC"
+    
+    # Run the virtual molecular digestion algorithm
+    resulting_fragments = digest_dna(raw_gene, enzyme, target_sequence)
+    
+    print("\n[Results] Digestion Finished Successfully!")
+    print(f"Generated Fragments: {resulting_fragments}")
+    
+    print("\nVisualizing data on agarose gel platform...")
+    plot_restriction_gel(original_size, resulting_fragments)
+
+if __name__ == "__main__":
+    main()
